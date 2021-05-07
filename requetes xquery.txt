@@ -1,0 +1,116 @@
+Excercice 14
+
+1) 	
+for $node in //item
+let $titre := replace(string-join($node/titre/article/element/data[@type='string'], ' '), '\s\.', '.')
+return concat($titre,'&#xa;')
+
+2)
+for $node in //item
+let $desc := replace(string-join($node/description/article/element/data[@type='string'], ' '), '\s\.', '.')
+return concat($desc,'&#xa;')
+
+3)
+for $item in //item
+let $titre := $item/titre/article
+let $desc := $item/description/article
+let $res := concat(replace(string-join($titre/element/data[@type='string'], ' '), '\s\.', '.'), '&#xa;', replace(string-join($desc/element/data[@type='string'], ' '), '\s\.', '.')) 
+return concat($res,'&#xa;')
+
+4)
+for $elem in //element
+where $elem/data[@type='type'] = 'NOM'
+return if ($elem/following-sibling::element[1][./data[contains(text(), 'ADJ')]])
+then concat($elem/data[@type='string']/text(), ' ', $elem/following-sibling::element[1][./data[contains(text(), 'ADJ')]]/data[@type='string']/text())
+else()
+
+5)
+for $art in //article
+for $elem in $art/element[data[@type='type'] = 'NOM']
+return if ($elem/following-sibling::element[1][data[contains(text(), 'PRP')]]/following-sibling::element[1][data[contains(text(), 'NOM')]]) then 
+concat($elem/data[@type='string']/text(), ' ', $elem/following-sibling::element[1]/data[@type='string']/text(), ' ', $elem/following-sibling::element[2]/data[@type='string']/text())
+else()
+
+
+PARTIE 2
+
+
+1)
+let $nbr_titres := count(//titre)
+let $nbr_descs := count(//description)
+return if($nbr_descs=$nbr_titres) then 
+concat('Nombres de titres ou descriptions : ',  $nbr_titres) 
+else
+concat('Titres : ', $nbr_titres, ' ', 'Descriptions : ', $nbr_descs)
+
+2)
+for $title in //titre
+let $titre := replace(string-join($title/p/item/a[2], ' '), '\s+[\.|\?]\s+§', '. ')
+return concat($titre, '&#xa;')
+
+3)
+for $desc in //description
+let $description := replace(string-join($desc/p/item/a[2], ' '), '\s+[\.|\?]\s+§*', '. ')
+return concat($description, '&#xa;')
+
+4)
+for $node in //titre | //description
+let $p := $node/p[@type='titre' or @type='description']
+let $titre_desc := concat(replace(string-join($p/item/a[2], ' '), '(.+)\s+.+§', '$1'), '.')
+where $p/item/a[2] != '§'
+return concat($titre_desc, '&#xa;')
+
+5)
+for $p in //p
+for $i in (1 to count($p/item))
+let $det := $p/item[$i][a[4]='DET']
+let $nom := $p/item[$i+1][a[4]='NC']
+let $adj := $p/item[$i+2][a[4]='ADJ']
+let $ver := $p/item[$i+3][a[4]='V']
+return (
+if ($det and $nom) then concat($det/a[2], ' ', $nom/a[2]) else(), 
+if ($det and $nom and $ver) then concat($det/a[2], ' ', $nom/a[2], ' ', $ver/a[2]) else(),
+if ($det and $nom and $ver and $adj) then concat($det/a[2], ' ', $nom/a[2], ' ', $adj/a[2], ' ', $ver/a[2]) else())
+
+6)
+for $dep in //item
+where $dep[a[8] = 'obj'] 
+return $dep
+
+7)
+for $gouv in //item[a[8] = 'sub']
+let $dep_index := $gouv/a[7]
+let $gouv_index := $gouv/a[1]
+let $result := 
+if (number($dep_index) < number($gouv_index)) then
+concat($gouv/preceding-sibling::item[number(a[1])=number($dep_index)]/a[2], ' ', $gouv/a[2])
+else 
+concat($gouv/a[2], ' ', $gouv/following-sibling::item[number(a[1])=number($dep_index)]/a[2])
+order by $result ascending
+return $result
+
+
+Exercice 15
+
+
+1)
+for $item in //item[@type='forme']
+where contains($item/a[8], 'OBJ')
+order by $item/f/text() ascending
+return concat($item/f/text(), ' ', $item/c/text())
+
+2)
+for $item in //item[@type='forme']
+where contains($item/a[8], 'OBJ')
+let $pos_gouv := replace($item/a[8], "OBJ\((\d+)\)", "$1" )
+let $pos_dep := $item/@pos
+where $item/f  and //item[@pos=$pos_gouv]/f
+let $result :=
+(
+if ($pos_gouv > $pos_dep)
+then  concat($item/f/text(), ' ', //item[@pos=$pos_gouv]/f/text())
+else (concat(//item[@pos=$pos_gouv]/f/text(), ' ', $item/f/text()))
+)
+order by $result ascending
+return $result
+
