@@ -7,7 +7,7 @@
     <xsl:variable name="count" saxon:assignable="yes" select="1"/>	
 
     <xsl:template match="/">
-        <xsl:comment>Toutes les feuilles de style utilisent XSLT 2.0 et doivent être "compilées" avec Saxon-EE 3.9.8 sur Oxygen</xsl:comment>
+        <xsl:comment>Toutes les feuilles de style utilisent XSLT 2.0 et doivent être "génerées" avec Saxon-EE 9.8 sur Oxygen</xsl:comment>
         <xsl:text disable-output-escaping='yes'>&#xD;&#xA;</xsl:text>
         <xsl:text disable-output-escaping='yes'>&lt;!DOCTYPE html&gt;</xsl:text>
         <xsl:text disable-output-escaping='yes'>&#xD;&#xA;</xsl:text>
